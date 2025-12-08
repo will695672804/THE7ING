@@ -8,11 +8,15 @@ import {
   Settings,
   ShoppingBag,
   Users,
+  Clock,
+  Truck,
 } from "lucide-react";
 import { Link, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import AdminCoursesManager from "./AdminCoursesManager";
 import AdminProductsManager from "./AdminProductsManager";
+import AdminOrdersManager from "./AdminOrdersManager";
+import AdminDeliveriesManager from "./AdminDeliveriesManager";
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -25,6 +29,18 @@ const AdminDashboard: React.FC = () => {
       label: "Vue d'ensemble",
       icon: LayoutDashboard,
       path: "/admin",
+    },
+    {
+      id: "orders",
+      label: "Commandes",
+      icon: Clock,
+      path: "/admin/orders",
+    },
+    {
+      id: "deliveries",
+      label: "Livraisons",
+      icon: Truck,
+      path: "/admin/deliveries",
     },
     {
       id: "courses",
@@ -74,11 +90,10 @@ const AdminDashboard: React.FC = () => {
               <Link
                 key={item.id}
                 to={item.path}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  location.pathname === item.path
-                    ? "bg-blue-50 text-blue-600 border border-blue-200"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === item.path
+                  ? "bg-blue-50 text-blue-600 border border-blue-200"
+                  : "text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
@@ -91,6 +106,8 @@ const AdminDashboard: React.FC = () => {
         <div className="flex-1 p-8 h-[calc(100dvh)] overflow-auto pb-24">
           <Routes>
             <Route path="/" element={<AdminOverview />} />
+            <Route path="/orders" element={<AdminOrdersManager />} />
+            <Route path="/deliveries" element={<AdminDeliveriesManager />} />
             <Route path="/courses" element={<AdminCoursesManager />} />
             <Route path="/products" element={<AdminProductsManager />} />
             <Route path="/users" element={<AdminUsersManager />} />
@@ -129,15 +146,15 @@ const AdminOverview: React.FC = () => {
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[{icon: BookOpen, title: "Pôles de Formation", value: "10", color: "blue"},
-          {icon: ShoppingBag, title: "Équipements", value: "150+", color: "green"},
-          {icon: Users, title: "Apprenants", value: "200+", color: "purple"},
-          {icon: BarChart3, title: "Services", value: "4", color: "orange"}].map((c, idx) => (
+        {[{ icon: BookOpen, title: "Pôles de Formation", value: "10", color: "blue" },
+        { icon: ShoppingBag, title: "Équipements", value: "150+", color: "green" },
+        { icon: Users, title: "Apprenants", value: "200+", color: "purple" },
+        { icon: BarChart3, title: "Services", value: "4", color: "orange" }].map((c, idx) => (
           <div key={idx} className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <div className={`p-3 rounded-lg bg-${"blue"===c.color?"blue":"green"===c.color?"green":"purple"===c.color?"purple":"orange"}-100`}>
-                  <c.icon className={`h-6 w-6 text-${"blue"===c.color?"blue":"green"===c.color?"green":"purple"===c.color?"purple":"orange"}-600`} />
+                <div className={`p-3 rounded-lg bg-${"blue" === c.color ? "blue" : "green" === c.color ? "green" : "purple" === c.color ? "purple" : "orange"}-100`}>
+                  <c.icon className={`h-6 w-6 text-${"blue" === c.color ? "blue" : "green" === c.color ? "green" : "purple" === c.color ? "purple" : "orange"}-600`} />
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">{c.title}</p>
@@ -211,7 +228,7 @@ const AdminUsersManager: React.FC = () => {
       { id: "2", name: "Bruno Dupont", email: "bruno@example.com", role: "user", status: "active", avatar: "" },
       { id: "3", name: "Claire Durand", email: "claire@example.com", role: "user", status: "suspended", avatar: "" },
       { id: "4", name: "David Leroy", email: "david@example.com", role: "user", status: "active", avatar: "" },
-    ] as Array<{id:string;name:string;email:string;role:"admin"|"user";status:"active"|"suspended";avatar?:string}>
+    ] as Array<{ id: string; name: string; email: string; role: "admin" | "user"; status: "active" | "suspended"; avatar?: string }>
   );
   const filtered = users.filter(u =>
     (role ? u.role === role : true) &&
@@ -228,9 +245,9 @@ const AdminUsersManager: React.FC = () => {
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative md:col-span-2">
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher par nom ou email..." className="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher par nom ou email..." className="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
-          <select value={role} onChange={e=>setRole(e.target.value)} className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select value={role} onChange={e => setRole(e.target.value)} className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">Tous les rôles</option>
             <option value="admin">Admin</option>
             <option value="user">Utilisateur</option>
@@ -259,7 +276,7 @@ const AdminUsersManager: React.FC = () => {
                         <img src={u.avatar} className="w-9 h-9 rounded-full object-cover" />
                       ) : (
                         <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
-                          {u.name.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase()}
+                          {u.name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()}
                         </div>
                       )}
                       <div>
@@ -270,10 +287,10 @@ const AdminUsersManager: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">{u.email}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${u.role==='admin'?'bg-purple-100 text-purple-800':'bg-gray-100 text-gray-800'}`}>{u.role==='admin'?"Admin":"Utilisateur"}</span>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>{u.role === 'admin' ? "Admin" : "Utilisateur"}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${u.status==='active'?'bg-green-100 text-green-800':'bg-orange-100 text-orange-800'}`}>{u.status==='active'?"Actif":"Suspendu"}</span>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${u.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}`}>{u.status === 'active' ? "Actif" : "Suspendu"}</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
@@ -300,7 +317,7 @@ const AdminMessagesManager: React.FC = () => {
     ]
   );
   const [activeId, setActiveId] = React.useState('c1');
-  const [messages, setMessages] = React.useState<Record<string, Array<{id:string;sender:'user'|'admin';text:string;time:string}>>>(
+  const [messages, setMessages] = React.useState<Record<string, Array<{ id: string; sender: 'user' | 'admin'; text: string; time: string }>>>(
     {
       c1: [
         { id: 'm1', sender: 'user', text: 'Bonjour, j’ai une question.', time: '09:12' },
@@ -320,9 +337,9 @@ const AdminMessagesManager: React.FC = () => {
   const send = () => {
     if (!draft.trim()) return;
     const newMsg = { id: String(Date.now()), sender: 'admin' as const, text: draft.trim(), time: 'Maintenant' };
-    setMessages(prev => ({ ...prev, [activeId]: [...(prev[activeId]||[]), newMsg] }));
+    setMessages(prev => ({ ...prev, [activeId]: [...(prev[activeId] || []), newMsg] }));
     setDraft("");
-    setConversations(prev => prev.map(c => c.id===activeId ? { ...c, last: newMsg.text, unread: 0 } : c));
+    setConversations(prev => prev.map(c => c.id === activeId ? { ...c, last: newMsg.text, unread: 0 } : c));
   };
 
   return (
@@ -335,14 +352,14 @@ const AdminMessagesManager: React.FC = () => {
           </div>
           <div className="max-h-[60vh] overflow-y-auto">
             {conversations.map(c => (
-              <button key={c.id} onClick={()=>setActiveId(c.id)} className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50 ${activeId===c.id? 'bg-blue-50':''}`}>
+              <button key={c.id} onClick={() => setActiveId(c.id)} className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50 ${activeId === c.id ? 'bg-blue-50' : ''}`}>
                 <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
-                  {c.user.name.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase()}
+                  {c.user.name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div className="font-medium text-gray-900 line-clamp-1">{c.user.name}</div>
-                    {c.unread>0 && <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">{c.unread}</span>}
+                    {c.unread > 0 && <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">{c.unread}</span>}
                   </div>
                   <div className="text-xs text-gray-500 line-clamp-1">{c.last}</div>
                 </div>
@@ -353,20 +370,20 @@ const AdminMessagesManager: React.FC = () => {
 
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
           <div className="p-4 border-b border-gray-100">
-            <div className="font-medium text-gray-900">{conversations.find(c=>c.id===activeId)?.user.name}</div>
-            <div className="text-xs text-gray-500">{conversations.find(c=>c.id===activeId)?.user.email}</div>
+            <div className="font-medium text-gray-900">{conversations.find(c => c.id === activeId)?.user.name}</div>
+            <div className="text-xs text-gray-500">{conversations.find(c => c.id === activeId)?.user.email}</div>
           </div>
           <div className="flex-1 p-4 space-y-3 overflow-y-auto">
-            {(messages[activeId]||[]).map(m => (
-              <div key={m.id} className={`max-w-[80%] ${m.sender==='admin'?'ml-auto':''}`}>
-                <div className={`px-3 py-2 rounded-lg text-sm ${m.sender==='admin'?'bg-blue-600 text-white':'bg-gray-100 text-gray-900'}`}>{m.text}</div>
+            {(messages[activeId] || []).map(m => (
+              <div key={m.id} className={`max-w-[80%] ${m.sender === 'admin' ? 'ml-auto' : ''}`}>
+                <div className={`px-3 py-2 rounded-lg text-sm ${m.sender === 'admin' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'}`}>{m.text}</div>
                 <div className="text-[10px] text-gray-500 mt-1">{m.time}</div>
               </div>
             ))}
           </div>
           <div className="p-3 border-t border-gray-100">
             <div className="flex items-center gap-2">
-              <input value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Écrire un message..." className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input value={draft} onChange={e => setDraft(e.target.value)} placeholder="Écrire un message..." className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
               <button onClick={send} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Envoyer</button>
             </div>
           </div>
@@ -393,19 +410,19 @@ const AdminSettings: React.FC = () => {
           <div className="mt-4 space-y-4">
             <div>
               <label className="block text-sm text-gray-700 mb-1">Nom du site</label>
-              <input value={siteName} onChange={e=>setSiteName(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input value={siteName} onChange={e => setSiteName(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div>
               <label className="block text-sm text-gray-700 mb-1">Email de support</label>
-              <input type="email" value={supportEmail} onChange={e=>setSupportEmail(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="email" value={supportEmail} onChange={e => setSupportEmail(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
               <div>
                 <div className="text-sm font-medium text-gray-900">Mode maintenance</div>
                 <div className="text-xs text-gray-500">Affiche un message de maintenance aux visiteurs</div>
               </div>
-              <button onClick={()=>setMaintenance(v=>!v)} className={`relative w-12 h-6 rounded-full ${maintenance?'bg-blue-600':'bg-gray-300'}`}>
-                <span className={`absolute top-0.5 ${maintenance?'right-0.5':'left-0.5'} w-5 h-5 bg-white rounded-full transition-all`} />
+              <button onClick={() => setMaintenance(v => !v)} className={`relative w-12 h-6 rounded-full ${maintenance ? 'bg-blue-600' : 'bg-gray-300'}`}>
+                <span className={`absolute top-0.5 ${maintenance ? 'right-0.5' : 'left-0.5'} w-5 h-5 bg-white rounded-full transition-all`} />
               </button>
             </div>
           </div>
@@ -419,8 +436,8 @@ const AdminSettings: React.FC = () => {
                 <div className="text-sm font-medium text-gray-900">Nouvelle inscription à un cours</div>
                 <div className="text-xs text-gray-500">Recevoir un email à chaque inscription</div>
               </div>
-              <button onClick={()=>setNotifEnroll(v=>!v)} className={`relative w-12 h-6 rounded-full ${notifEnroll?'bg-blue-600':'bg-gray-300'}`}>
-                <span className={`absolute top-0.5 ${notifEnroll?'right-0.5':'left-0.5'} w-5 h-5 bg-white rounded-full transition-all`} />
+              <button onClick={() => setNotifEnroll(v => !v)} className={`relative w-12 h-6 rounded-full ${notifEnroll ? 'bg-blue-600' : 'bg-gray-300'}`}>
+                <span className={`absolute top-0.5 ${notifEnroll ? 'right-0.5' : 'left-0.5'} w-5 h-5 bg-white rounded-full transition-all`} />
               </button>
             </div>
             <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
@@ -428,8 +445,8 @@ const AdminSettings: React.FC = () => {
                 <div className="text-sm font-medium text-gray-900">Nouvelle commande</div>
                 <div className="text-xs text-gray-500">Recevoir un email pour chaque commande</div>
               </div>
-              <button onClick={()=>setNotifOrder(v=>!v)} className={`relative w-12 h-6 rounded-full ${notifOrder?'bg-blue-600':'bg-gray-300'}`}>
-                <span className={`absolute top-0.5 ${notifOrder?'right-0.5':'left-0.5'} w-5 h-5 bg-white rounded-full transition-all`} />
+              <button onClick={() => setNotifOrder(v => !v)} className={`relative w-12 h-6 rounded-full ${notifOrder ? 'bg-blue-600' : 'bg-gray-300'}`}>
+                <span className={`absolute top-0.5 ${notifOrder ? 'right-0.5' : 'left-0.5'} w-5 h-5 bg-white rounded-full transition-all`} />
               </button>
             </div>
           </div>

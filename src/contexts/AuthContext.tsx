@@ -37,15 +37,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token) {
         apiService.setToken(token);
         try {
-          const response: any = await apiService.getProfile(); // 👈 typage explicite en any
-          const userData: any = response.user; // 👈 idem ici
-          setUser({
-            id: userData.id?.toString() ?? '',
-            name: userData.name ?? '',
-            email: userData.email ?? '',
-            role: userData.role ?? 'user',
-            avatar: userData.avatar,
-          });
+          const response: any = await apiService.getProfile();
+          // Handle both {user: {...}} and direct user object formats
+          const userData: any = response?.user || response;
+          if (userData && userData.email) {
+            setUser({
+              id: userData.id?.toString() ?? '',
+              name: userData.name ?? '',
+              email: userData.email ?? '',
+              role: userData.role ?? 'user',
+              avatar: userData.avatar,
+            });
+          } else {
+            localStorage.removeItem('token');
+            setUser(null);
+          }
         } catch (error: any) {
           console.error('Failed to fetch user profile:', error);
           localStorage.removeItem('token');
@@ -62,15 +68,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const response: any = await apiService.login(email, password);
-      const userData: any = response.user;
-      setUser({
-        id: userData.id?.toString() ?? '',
-        name: userData.name ?? '',
-        email: userData.email ?? '',
-        role: userData.role ?? 'user',
-        avatar: userData.avatar,
-      });
-      return true;
+      // Handle both {user: {...}} and direct user object formats
+      const userData: any = response?.user || response;
+      if (userData && userData.email) {
+        setUser({
+          id: userData.id?.toString() ?? '',
+          name: userData.name ?? '',
+          email: userData.email ?? '',
+          role: userData.role ?? 'user',
+          avatar: userData.avatar,
+        });
+        return true;
+      }
+      return false;
     } catch (error: any) {
       console.error('Login failed:', error);
       return false;
@@ -83,15 +93,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const response: any = await apiService.register(name, email, password);
-      const userData: any = response.user;
-      setUser({
-        id: userData.id?.toString() ?? '',
-        name: userData.name ?? '',
-        email: userData.email ?? '',
-        role: userData.role ?? 'user',
-        avatar: userData.avatar,
-      });
-      return true;
+      // Handle both {user: {...}} and direct user object formats
+      const userData: any = response?.user || response;
+      if (userData && userData.email) {
+        setUser({
+          id: userData.id?.toString() ?? '',
+          name: userData.name ?? '',
+          email: userData.email ?? '',
+          role: userData.role ?? 'user',
+          avatar: userData.avatar,
+        });
+        return true;
+      }
+      return false;
     } catch (error: any) {
       console.error('Registration failed:', error);
       throw error;

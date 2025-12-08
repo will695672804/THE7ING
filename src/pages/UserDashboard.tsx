@@ -1,6 +1,7 @@
 import {
   Award,
   BookOpen,
+  Check,
   Clock,
   Settings,
   ShoppingBag,
@@ -14,7 +15,7 @@ import { apiService } from "../services/api";
 
 const UserDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { courses, fetchCourses } = useCourses();
+  const { courses } = useCourses();
   const [profileData, setProfileData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -41,29 +42,41 @@ const UserDashboard: React.FC = () => {
   ];
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadProfileAndOrders = async () => {
       if (user) {
         try {
           const profileResponse = await apiService.getProfile();
-          setProfileData({
-            name: profileResponse.user.name,
-            email: profileResponse.user.email,
-            phone: profileResponse.user.phone || "",
-            address: profileResponse.user.address || "",
-          });
+          // Handle both {user: {...}} and direct user object formats
+          const userData = profileResponse?.user || profileResponse;
+          if (isMounted && userData) {
+            setProfileData({
+              name: userData.name || "",
+              email: userData.email || "",
+              phone: userData.phone || "",
+              address: userData.address || "",
+            });
+          }
 
           const ordersResponse = await apiService.getMyOrders();
-          setUserOrders(ordersResponse.orders);
-
-          // Re-fetch courses to ensure enrollment status and progress are up-to-date
-          await fetchCourses();
+          // Handle both {orders: [...]} and direct array formats
+          const ordersData = ordersResponse?.orders || ordersResponse || [];
+          if (isMounted) {
+            setUserOrders(Array.isArray(ordersData) ? ordersData : []);
+          }
         } catch (error) {
           console.error("Error loading user data:", error);
         }
       }
     };
     loadProfileAndOrders();
-  }, [user, fetchCourses]);
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]); // Only re-run when user ID changes, not on every user object change
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,11 +159,10 @@ const UserDashboard: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                      activeTab === tab.id
-                        ? "bg-blue-50 text-blue-600 border border-blue-200"
-                        : "text-gray-700 hover:bg-gray-50"
-                    }`}
+                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === tab.id
+                      ? "bg-blue-50 text-blue-600 border border-blue-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                      }`}
                   >
                     <tab.icon className="h-5 w-5" />
                     <span>{tab.label}</span>
@@ -362,6 +374,12 @@ const UserDashboard: React.FC = () => {
                           >
                             Date
                           </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          >
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -378,17 +396,48 @@ const UserDashboard: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
                               <span
-                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  order.status === "delivered"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-yellow-100 text-yellow-800"
-                                }`}
+                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === "completed" || order.status === "delivered"
+                                  ? "bg-green-100 text-green-800"
+                                  : order.status === "processing" || order.status === "in_progress" || order.status === "in_delivery"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : order.status === "cancelled"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-yellow-100 text-yellow-800"
+                                  }`}
                               >
-                                {order.status}
+                                {order.status === "pending" ? "En attente" :
+                                  order.status === "processing" || order.status === "in_progress" ? "En cours" :
+                                    order.status === "in_delivery" ? "En livraison" :
+                                      order.status === "completed" || order.status === "delivered" ? "Livré" :
+                                        order.status === "cancelled" ? "Annulé" : order.status}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {new Date(order.created_at).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              {(order.status === 'processing' || order.status === 'in_progress' || order.status === 'in_delivery') && (
+                                <button
+                                  onClick={async () => {
+                                    if (confirm("Confirmez-vous avoir bien reçu cette commande ?")) {
+                                      try {
+                                        await apiService.confirmOrderDelivery(order.id);
+                                        // Refresh orders
+                                        const response = await apiService.getMyOrders();
+                                        setUserOrders(response.orders || []);
+                                        alert("Réception confirmée avec succès !");
+                                      } catch (error) {
+                                        console.error("Error confirming delivery:", error);
+                                        alert("Erreur lors de la confirmation");
+                                      }
+                                    }
+                                  }}
+                                  className="text-green-600 hover:text-green-900 flex items-center"
+                                >
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Confirmer réception
+                                </button>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -504,7 +553,7 @@ const UserDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

@@ -2,6 +2,20 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiService } from '../services/api';
 import { useAuth } from './AuthContext';
 
+// Backend base URL for media files
+const BACKEND_URL = 'http://localhost:8000';
+
+// Helper to build full image URL
+const getFullImageUrl = (imagePath: string): string => {
+  if (!imagePath) return '';
+  // If already a full URL, return as-is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  // Otherwise, prepend backend URL
+  return `${BACKEND_URL}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
+
 interface CartItem {
   id: string;
   name: string;
@@ -53,7 +67,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: `${item.type}_${item.itemId}`,
         name: item.name ?? '',
         price: item.price ?? 0,
-        image: item.image ?? '',
+        image: getFullImageUrl(item.image ?? ''),
         quantity: item.quantity ?? 1,
         type: item.type,
         itemId: item.itemId?.toString() ?? '',

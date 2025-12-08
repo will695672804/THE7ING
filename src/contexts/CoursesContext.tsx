@@ -1,6 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiService } from '../services/api';
 
+// Backend base URL for media files
+const BACKEND_URL = 'http://localhost:8000';
+
+// Helper to build full image URL
+const getFullImageUrl = (imagePath: string): string => {
+  if (!imagePath) return '';
+  // If already a full URL, return as-is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  // Otherwise, prepend backend URL
+  return `${BACKEND_URL}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
+
 export interface Lesson {
   id: string;
   title: string;
@@ -54,21 +68,23 @@ export const CoursesProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const fetchCourses = async () => {
     try {
       const response: any = await apiService.getCourses();
-      const mappedCourses: Course[] = (response.courses || []).map((c: any) => ({
+      // Handle both {courses: [...]} and direct array formats
+      const coursesArray = response?.courses || response || [];
+      const mappedCourses: Course[] = (Array.isArray(coursesArray) ? coursesArray : []).map((c: any) => ({
         id: c.id?.toString() ?? '',
         title: c.title ?? '',
         description: c.description ?? '',
         instructor: c.instructor ?? '',
-        price: c.price ?? 0,
-        image: c.image ?? '',
+        price: Number(c.price) || 0,
+        image: getFullImageUrl(c.image ?? ''),
         duration: c.duration ?? '',
         level: c.level ?? 'Débutant',
         category: c.category ?? '',
-        rating: c.rating ?? 0,
-        studentsCount: c.students_count ?? 0,
+        rating: Number(c.rating) || 0,
+        studentsCount: Number(c.students_count) || 0,
         lessons: [],
-        isEnrolled: c.is_enrolled === 1,
-        progress: c.progress ?? 0,
+        isEnrolled: c.is_enrolled === 1 || c.is_enrolled === true,
+        progress: Number(c.progress) || 0,
       }));
       setCourses(mappedCourses);
     } catch (error: any) {
@@ -79,29 +95,31 @@ export const CoursesProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const fetchCourseById = async (id: string): Promise<Course | undefined> => {
     try {
       const response: any = await apiService.getCourse(id);
-      const courseData: any = response.course;
+      // Handle both {course: {...}} and direct object formats
+      const courseData: any = response?.course || response;
+      if (!courseData) return undefined;
       return {
         id: courseData.id?.toString() ?? '',
         title: courseData.title ?? '',
         description: courseData.description ?? '',
         instructor: courseData.instructor ?? '',
-        price: courseData.price ?? 0,
-        image: courseData.image ?? '',
+        price: Number(courseData.price) || 0,
+        image: getFullImageUrl(courseData.image ?? ''),
         duration: courseData.duration ?? '',
         level: courseData.level ?? 'Débutant',
         category: courseData.category ?? '',
-        rating: courseData.rating ?? 0,
-        studentsCount: courseData.students_count ?? 0,
+        rating: Number(courseData.rating) || 0,
+        studentsCount: Number(courseData.students_count) || 0,
         lessons: (courseData.lessons || []).map((l: any) => ({
           id: l.id?.toString() ?? '',
           title: l.title ?? '',
           duration: l.duration ?? '',
           videoUrl: l.video_url ?? '',
-          isCompleted: l.is_completed === 1,
-          order_index: l.order_index ?? 0,
+          isCompleted: l.is_completed === 1 || l.is_completed === true,
+          order_index: Number(l.order_index) || 0,
         })),
-        isEnrolled: courseData.is_enrolled === 1,
-        progress: courseData.progress ?? 0,
+        isEnrolled: courseData.is_enrolled === 1 || courseData.is_enrolled === true,
+        progress: Number(courseData.progress) || 0,
       };
     } catch (error: any) {
       console.error(`Error fetching course ${id}:`, error);

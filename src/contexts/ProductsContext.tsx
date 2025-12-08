@@ -1,6 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiService } from '../services/api';
 
+// Backend base URL for media files
+const BACKEND_URL = 'http://localhost:8000';
+
+// Helper to build full image URL
+const getFullImageUrl = (imagePath: string): string => {
+  if (!imagePath) return '';
+  // If already a full URL, return as-is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  // Otherwise, prepend backend URL
+  return `${BACKEND_URL}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
+
 export interface Product {
   id: string;
   name: string;
@@ -39,17 +53,19 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const fetchProducts = async () => {
     try {
       const response: any = await apiService.getProducts();
-      const mappedProducts: Product[] = (response.products || []).map((p: any) => ({
+      // Handle both {products: [...]} and direct array formats
+      const productsArray = response?.products || response || [];
+      const mappedProducts: Product[] = (Array.isArray(productsArray) ? productsArray : []).map((p: any) => ({
         id: p.id?.toString() ?? '',
         name: p.name ?? '',
         description: p.description ?? '',
-        price: p.price ?? 0,
-        image: p.image ?? '',
+        price: Number(p.price) || 0,
+        image: getFullImageUrl(p.image ?? ''),
         category: p.category ?? '',
-        rating: p.rating ?? 0,
-        reviewsCount: p.reviews_count ?? 0,
-        stock: p.stock ?? 0,
-        features: typeof p.features === 'string' ? p.features.split(',') : [],
+        rating: Number(p.rating) || 0,
+        reviewsCount: Number(p.reviews_count) || 0,
+        stock: Number(p.stock) || 0,
+        features: typeof p.features === 'string' ? p.features.split(',') : (Array.isArray(p.features) ? p.features : []),
       }));
       setProducts(mappedProducts);
     } catch (error: any) {
@@ -61,18 +77,20 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const fetchProductById = async (id: string): Promise<Product | undefined> => {
     try {
       const response: any = await apiService.getProduct(id);
-      const p: any = response.product;
+      // Handle both {product: {...}} and direct object formats
+      const p: any = response?.product || response;
+      if (!p) return undefined;
       return {
         id: p.id?.toString() ?? '',
         name: p.name ?? '',
         description: p.description ?? '',
-        price: p.price ?? 0,
-        image: p.image ?? '',
+        price: Number(p.price) || 0,
+        image: getFullImageUrl(p.image ?? ''),
         category: p.category ?? '',
-        rating: p.rating ?? 0,
-        reviewsCount: p.reviews_count ?? 0,
-        stock: p.stock ?? 0,
-        features: typeof p.features === 'string' ? p.features.split(',') : [],
+        rating: Number(p.rating) || 0,
+        reviewsCount: Number(p.reviews_count) || 0,
+        stock: Number(p.stock) || 0,
+        features: typeof p.features === 'string' ? p.features.split(',') : (Array.isArray(p.features) ? p.features : []),
       };
     } catch (error: any) {
       console.error(`Error fetching product ${id}:`, error);

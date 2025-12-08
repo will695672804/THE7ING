@@ -1,13 +1,226 @@
-import { ArrowLeft, Download, Printer as Print } from "lucide-react";
-import React from "react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, Download, Printer as Print, Upload, X, Check, Loader2 } from "lucide-react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useCart } from "../contexts/CartContext";
 import { apiService } from "../services/api";
 
+// Modal de paiement avec upload d'image
+const PaymentModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (paymentMethod: string, proofImage: File) => Promise<void>;
+  totalAmount: number;
+}> = ({ isOpen, onClose, onSubmit, totalAmount }) => {
+  const [paymentMethod, setPaymentMethod] = useState<string>("mobile_money");
+  const [proofImage, setProofImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Vérifier le type de fichier
+      if (!file.type.startsWith("image/")) {
+        setError("Veuillez sélectionner une image valide");
+        return;
+      }
+      // Vérifier la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("L'image ne doit pas dépasser 5 Mo");
+        return;
+      }
+      setProofImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setError(null);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!proofImage) {
+      setError("Veuillez téléverser une preuve de paiement");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await onSubmit(paymentMethod, proofImage);
+    } catch (err: any) {
+      setError(err.message || "Une erreur est survenue");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const removeImage = () => {
+    setProofImage(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white">Confirmer le paiement</h2>
+          <button
+            onClick={onClose}
+            className="text-white/80 hover:text-white transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Montant */}
+          <div className="text-center p-4 bg-gray-50 rounded-xl">
+            <p className="text-sm text-gray-600 mb-1">Montant à payer</p>
+            <p className="text-3xl font-bold text-blue-600">{totalAmount.toFixed(2)} €</p>
+          </div>
+
+          {/* Méthode de paiement */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Méthode de paiement
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("mobile_money")}
+                className={`p-4 rounded-xl border-2 transition-all ${paymentMethod === "mobile_money"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
+                  }`}
+              >
+                <div className="text-center">
+                  <span className="text-2xl mb-1 block">📱</span>
+                  <span className="text-sm font-medium">Mobile Money</span>
+                  <p className="text-xs text-gray-500 mt-1">+237 674 13 66 97</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("orange_money")}
+                className={`p-4 rounded-xl border-2 transition-all ${paymentMethod === "orange_money"
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
+                  }`}
+              >
+                <div className="text-center">
+                  <span className="text-2xl mb-1 block">🍊</span>
+                  <span className="text-sm font-medium">Orange Money</span>
+                  <p className="text-xs text-gray-500 mt-1">+237 694 01 82 07</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Upload de preuve */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Preuve de paiement <span className="text-red-500">*</span>
+            </label>
+
+            {!proofImage ? (
+              <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="w-10 h-10 text-gray-400 mb-3" />
+                  <p className="text-sm text-gray-600 text-center">
+                    <span className="font-medium text-blue-600">Cliquez pour téléverser</span>
+                    <br />
+                    <span className="text-xs text-gray-500">ou glissez-déposez l'image</span>
+                  </p>
+                  <p className="text-xs text-gray-400 mt-2">PNG, JPG jusqu'à 5 Mo</p>
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </label>
+            ) : (
+              <div className="relative">
+                <img
+                  src={previewUrl || ""}
+                  alt="Preuve de paiement"
+                  className="w-full h-40 object-cover rounded-xl"
+                />
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+                <div className="absolute bottom-2 left-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
+                  <Check size={14} />
+                  Image ajoutée
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Error message */}
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Submit button */}
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !proofImage}
+            className={`w-full py-4 rounded-xl font-medium text-lg transition-all flex items-center justify-center gap-2 ${isSubmitting || !proofImage
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl"
+              }`}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin" size={20} />
+                Traitement en cours...
+              </>
+            ) : (
+              <>
+                <Check size={20} />
+                Confirmer le paiement
+              </>
+            )}
+          </button>
+
+          <p className="text-xs text-gray-500 text-center">
+            En confirmant, vous acceptez nos conditions générales de vente.
+            Votre commande sera validée après vérification du paiement.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const InvoicePage: React.FC = () => {
   const { items, total, clearCart } = useCart();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Générer un numéro de facture unique
   const invoiceNumber = `2025-${Math.floor(Math.random() * 10000)
@@ -44,15 +257,32 @@ const InvoicePage: React.FC = () => {
     );
   };
 
-  const handlePaymentComplete = async () => {
+  const handlePaymentSubmit = async (paymentMethod: string, proofImage: File) => {
     try {
-      // Créer la commande via l'API
-      await apiService.createOrder("Mobile Money", "N/A"); // Adresse non disponible sur le type User
-      await clearCart(); // Vider le panier après paiement réussi
+      // Créer FormData pour envoyer l'image avec les données
+      const formData = new FormData();
+      formData.append("payment_method", paymentMethod);
+      formData.append("payment_proof", proofImage);
+      formData.append("total", totalTTC.toString());
+      formData.append("invoice_number", invoiceNumber);
+
+      // Ajouter les items du panier
+      items.forEach((item, index) => {
+        formData.append(`items[${index}][id]`, item.itemId);
+        formData.append(`items[${index}][type]`, item.type);
+        formData.append(`items[${index}][name]`, item.name);
+        formData.append(`items[${index}][price]`, item.price.toString());
+        formData.append(`items[${index}][quantity]`, item.quantity.toString());
+      });
+
+      await apiService.createOrderWithProof(formData);
+      await clearCart();
+      setShowPaymentModal(false);
       alert("Paiement effectué avec succès ! Merci pour votre commande.");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error processing payment:", error);
-      alert("Une erreur est survenue lors du traitement de votre paiement.");
+      throw error;
     }
   };
 
@@ -288,18 +518,25 @@ const InvoicePage: React.FC = () => {
         {/* Payment Button */}
         <div className="mt-8 text-center print:hidden">
           <button
-            onClick={handlePaymentComplete}
+            onClick={() => setShowPaymentModal(true)}
             disabled={!user}
-            className={`px-8 py-4 rounded-lg font-medium text-lg transition-colors ${
-              user
+            className={`px-8 py-4 rounded-lg font-medium text-lg transition-colors ${user
                 ? "bg-green-600 text-white hover:bg-green-700"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+              }`}
           >
             Confirmer le paiement - {totalTTC.toFixed(2)} €
           </button>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSubmit={handlePaymentSubmit}
+        totalAmount={totalTTC}
+      />
     </div>
   );
 };
