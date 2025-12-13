@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://site--the7e1--vm5pf569dg4m.code.run/api';
 
 class ApiService {
   private baseURL: string;
@@ -29,7 +29,21 @@ class ApiService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+
+        let errorMessage = errorData.message || `HTTP error! status: ${response.status}`;
+
+        // Handle structured validation errors (e.g., Django DRF format)
+        if (!errorData.message && typeof errorData === 'object' && Object.keys(errorData).length > 0) {
+          const details = Object.entries(errorData)
+            .map(([key, msgs]) => {
+              const msgStr = Array.isArray(msgs) ? msgs.join(', ') : String(msgs);
+              return `${key}: ${msgStr}`;
+            })
+            .join(' | ');
+          if (details) errorMessage = details;
+        }
+
+        throw new Error(errorMessage);
       }
 
       return response.status === 204 ? {} as T : await response.json();

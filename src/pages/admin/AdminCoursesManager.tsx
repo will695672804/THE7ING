@@ -88,11 +88,12 @@ const AdminCoursesManager: React.FC = () => {
                 <tr key={course.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-4">
-                      <img
-                        src={course.image}
-                        alt={course.title}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
+                      {course.image && (
+                        <video
+                          src={course.image}
+                          className="w-12 h-12 object-cover rounded-lg"
+                        />
+                      )}
                       <div>
                         <h3 className="font-medium text-gray-900">{course.title}</h3>
                         <p className="text-sm text-gray-500">{course.duration} • {course.level}</p>
@@ -162,7 +163,7 @@ const CourseModal: React.FC<CourseModalProps> = ({ course, onSubmit, onClose }) 
     level: course?.level || 'Débutant',
     category: course?.category || ''
   });
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,10 +177,10 @@ const CourseModal: React.FC<CourseModalProps> = ({ course, onSubmit, onClose }) 
     data.append('level', formData.level);
     data.append('category', formData.category);
 
-    if (selectedImage) {
-      data.append('image', selectedImage);
+    if (selectedVideo) {
+      data.append('image', selectedVideo);
     } else if (formData.image) {
-      // If no new image is selected but there was an existing one, send its URL
+      // If no new video is selected but there was an existing one, send its URL
       data.append('image', formData.image);
     }
 
@@ -192,7 +193,7 @@ const CourseModal: React.FC<CourseModalProps> = ({ course, onSubmit, onClose }) 
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           {course ? 'Modifier la formation' : 'Nouvelle formation'}
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -207,7 +208,7 @@ const CourseModal: React.FC<CourseModalProps> = ({ course, onSubmit, onClose }) 
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Instructeur
@@ -237,25 +238,40 @@ const CourseModal: React.FC<CourseModalProps> = ({ course, onSubmit, onClose }) 
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Image de la formation
+              Vidéo de la formation
             </label>
-            <div className="flex items-center space-x-4">
-              <input
-                type="file"
-                id="course-image-upload"
-                accept="image/*"
-                onChange={(e) => setSelectedImage(e.target.files ? e.target.files[0] : null)}
-                className="hidden"
-              />
-              <label
-                htmlFor="course-image-upload"
-                className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center space-x-2 border border-gray-300"
-              >
-                <Upload className="h-5 w-5" />
-                <span>{selectedImage ? selectedImage.name : "Choisir une image"}</span>
-              </label>
-              {course?.image && !selectedImage && (
-                <span className="text-sm text-gray-500">Image actuelle: {course.image.split('/').pop()}</span>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4">
+                <input
+                  type="file"
+                  id="course-video-upload"
+                  accept="video/*"
+                  onChange={(e) => setSelectedVideo(e.target.files ? e.target.files[0] : null)}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="course-video-upload"
+                  className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center space-x-2 border border-gray-300"
+                >
+                  <Upload className="h-5 w-5" />
+                  <span>{selectedVideo ? selectedVideo.name : "Choisir une vidéo"}</span>
+                </label>
+              </div>
+
+              {(selectedVideo || formData.image) && (
+                <div className="relative w-full max-w-sm">
+                  <video
+                    src={selectedVideo ? URL.createObjectURL(selectedVideo) : formData.image}
+                    controls
+                    className="w-full rounded-lg border border-gray-200"
+                    style={{ maxHeight: '200px' }}
+                  >
+                    Votre navigateur ne supporte pas la lecture de vidéos.
+                  </video>
+                  {formData.image && !selectedVideo && (
+                    <p className="text-xs text-gray-500 mt-1">Vidéo actuelle: {formData.image.split('/').pop()}</p>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -273,7 +289,7 @@ const CourseModal: React.FC<CourseModalProps> = ({ course, onSubmit, onClose }) 
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Durée
@@ -287,7 +303,7 @@ const CourseModal: React.FC<CourseModalProps> = ({ course, onSubmit, onClose }) 
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Niveau
@@ -317,10 +333,10 @@ const CourseModal: React.FC<CourseModalProps> = ({ course, onSubmit, onClose }) 
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                URL de l'image
+                URL de la vidéo
               </label>
               <input
                 type="url"
