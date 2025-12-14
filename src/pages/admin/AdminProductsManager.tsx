@@ -1,6 +1,7 @@
 import { Edit, Filter, Plus, Search, Trash2, Upload } from "lucide-react";
 import React, { useState } from "react";
 import { Product, useProducts } from "../../contexts/ProductsContext";
+import { fixImageUrl } from "../../services/api";
 
 const AdminProductsManager: React.FC = () => {
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
@@ -104,7 +105,7 @@ const AdminProductsManager: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-4">
                       <img
-                        src={product.image}
+                        src={fixImageUrl(product.image)}
                         alt={product.name}
                         className="w-12 h-12 object-cover rounded-lg"
                       />
@@ -128,13 +129,12 @@ const AdminProductsManager: React.FC = () => {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs text-center font-medium ${
-                        product.stock > 10
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs text-center font-medium ${product.stock > 10
                           ? "bg-blue-100 text-blue-800"
                           : product.stock > 0
-                          ? "bg-orange-100 text-orange-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
+                            ? "bg-orange-100 text-orange-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
                     >
                       {product.stock} en stock
                     </span>

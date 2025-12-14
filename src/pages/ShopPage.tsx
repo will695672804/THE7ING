@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { useProducts } from "../contexts/ProductsContext";
+import { fixImageUrl } from "../services/api";
 
 const ShopPage: React.FC = () => {
   const { products } = useProducts();
@@ -106,21 +107,19 @@ const ShopPage: React.FC = () => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-3 rounded-lg ${
-                  viewMode === "grid"
+                className={`p-3 rounded-lg ${viewMode === "grid"
                     ? "bg-green-600 text-white"
                     : "bg-gray-200 text-gray-600"
-                }`}
+                  }`}
               >
                 <Grid className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-3 rounded-lg ${
-                  viewMode === "list"
+                className={`p-3 rounded-lg ${viewMode === "list"
                     ? "bg-green-600 text-white"
                     : "bg-gray-200 text-gray-600"
-                }`}
+                  }`}
               >
                 <List className="h-5 w-5" />
               </button>
@@ -147,7 +146,7 @@ const ShopPage: React.FC = () => {
               >
                 <div className="relative group">
                   <img
-                    src={product.image}
+                    src={fixImageUrl(product.image)}
                     alt={product.name}
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -221,7 +220,7 @@ const ShopPage: React.FC = () => {
                 <div className="flex">
                   <div className="w-48 h-32 flex-shrink-0">
                     <img
-                      src={product.image}
+                      src={fixImageUrl(product.image)}
                       alt={product.name}
                       className="w-full h-full object-cover"
                     />

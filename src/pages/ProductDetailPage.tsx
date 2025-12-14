@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, ShoppingCart, Heart, Share2, Truck, Shield, RotateCcw } from 'lucide-react';
 import { useProducts } from '../contexts/ProductsContext';
 import { useCart } from '../contexts/CartContext';
+import { fixImageUrl } from '../services/api';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,11 +26,11 @@ const ProductDetailPage: React.FC = () => {
       </div>
     );
   }
-  
+
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
-       addToCart(product.id, 'product', quantity);
+      addToCart(product.id, 'product', quantity);
 
     }
   };
@@ -82,7 +83,7 @@ const ProductDetailPage: React.FC = () => {
           <div className="space-y-4">
             <div className="aspect-square bg-white rounded-xl overflow-hidden shadow-lg">
               <img
-                src={product.image}
+                src={fixImageUrl(product.image)}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -98,17 +99,16 @@ const ProductDetailPage: React.FC = () => {
                 </span>
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
-              
+
               <div className="flex items-center space-x-4 mb-4">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-5 w-5 ${
-                        i < Math.floor(product.rating)
+                      className={`h-5 w-5 ${i < Math.floor(product.rating)
                           ? 'text-yellow-400 fill-current'
                           : 'text-gray-300'
-                      }`}
+                        }`}
                     />
                   ))}
                   <span className="ml-2 text-sm font-medium">{product.rating}</span>
@@ -207,11 +207,10 @@ const ProductDetailPage: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-6 py-4 font-medium text-sm border-b-2 ${
-                    activeTab === tab.id
+                  className={`px-6 py-4 font-medium text-sm border-b-2 ${activeTab === tab.id
                       ? 'border-green-500 text-green-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -224,8 +223,8 @@ const ProductDetailPage: React.FC = () => {
               <div className="prose max-w-none">
                 <p className="text-gray-600 mb-4">{product.description}</p>
                 <p className="text-gray-600">
-                  Ce produit de haute qualité est conçu pour répondre aux besoins des professionnels 
-                  et des passionnés. Avec ses caractéristiques avancées et sa construction robuste, 
+                  Ce produit de haute qualité est conçu pour répondre aux besoins des professionnels
+                  et des passionnés. Avec ses caractéristiques avancées et sa construction robuste,
                   il vous accompagnera dans tous vos projets.
                 </p>
               </div>
@@ -258,7 +257,7 @@ const ProductDetailPage: React.FC = () => {
                           </div>
                         </div>
                         <p className="text-gray-600">
-                          Excellent produit ! La qualité est au rendez-vous et la livraison a été rapide. 
+                          Excellent produit ! La qualité est au rendez-vous et la livraison a été rapide.
                           Je recommande vivement.
                         </p>
                       </div>
@@ -282,7 +281,7 @@ const ProductDetailPage: React.FC = () => {
                   className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
                 >
                   <img
-                    src={relatedProduct.image}
+                    src={fixImageUrl(relatedProduct.image)}
                     alt={relatedProduct.name}
                     className="w-full h-48 object-cover"
                   />

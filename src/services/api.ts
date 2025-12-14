@@ -1,4 +1,22 @@
 const API_BASE_URL = 'https://site--the7e1--vm5pf569dg4m.code.run/api';
+const BACKEND_BASE_URL = 'https://site--the7e1--vm5pf569dg4m.code.run';
+
+// Utility function to fix image URLs from localhost to production
+export const fixImageUrl = (url: string | null | undefined): string => {
+  if (!url) return '';
+
+  // Replace localhost:8000 with production backend URL
+  if (url.includes('localhost:8000')) {
+    return url.replace('http://localhost:8000', BACKEND_BASE_URL);
+  }
+
+  // If it's a relative URL starting with /media, prepend backend URL
+  if (url.startsWith('/media/')) {
+    return `${BACKEND_BASE_URL}${url}`;
+  }
+
+  return url;
+};
 
 class ApiService {
   private baseURL: string;

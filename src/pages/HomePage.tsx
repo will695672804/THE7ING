@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Users, BookOpen, ShoppingBag, Play, Award, MessageCircle } from 'lucide-react';
 import { useCourses } from '../contexts/CoursesContext';
 import { useProducts } from '../contexts/ProductsContext';
+import { fixImageUrl } from '../services/api';
 
 const HomePage: React.FC = () => {
   const { courses } = useCourses();
@@ -24,12 +25,12 @@ const HomePage: React.FC = () => {
                 </span>
               </div>
               <h1 className="text-6xl font-bold leading-tight">
-                Votre expertise technique commence 
+                Votre expertise technique commence
                 <span className="text-yellow-300"> avec nous</span>
               </h1>
               <p className="text-xl text-blue-100 leading-relaxed">
-                <strong>THE SEVEN ENGINEER</strong> est un centre de formation à but non lucratif situé à Ngaoundéré. 
-                Nous offrons un soutien aux étudiants, élèves, entreprises et startups avec des formations pratiques 
+                <strong>THE SEVEN ENGINEER</strong> est un centre de formation à but non lucratif situé à Ngaoundéré.
+                Nous offrons un soutien aux étudiants, élèves, entreprises et startups avec des formations pratiques
                 en sciences de l'ingénieur, des services d\'ingénierie et du matériel technique de qualité.
               </p>
               <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 border border-white border-opacity-20">
@@ -106,8 +107,8 @@ const HomePage: React.FC = () => {
               À propos de <span className="text-blue-600">THE SEVEN ENGINEER</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              THE SEVEN ENGINEER est un centre de formation à but non lucratif situé dans l'arrondissement de Ngaoundéré 3ème, 
-              précisément à Bini. Notre mission est d'apporter un soutien complémentaire à la formation de la jeunesse camerounaise 
+              THE SEVEN ENGINEER est un centre de formation à but non lucratif situé dans l'arrondissement de Ngaoundéré 3ème,
+              précisément à Bini. Notre mission est d'apporter un soutien complémentaire à la formation de la jeunesse camerounaise
               et d'ouvrir une porte entre l'école et l'industrie en orientant nos formations sur les métiers d'ingénierie.
             </p>
           </div>
@@ -116,8 +117,8 @@ const HomePage: React.FC = () => {
             <div className="space-y-6">
               <h3 className="text-3xl font-bold text-gray-900">Notre Vision</h3>
               <p className="text-gray-600 text-lg leading-relaxed">
-                Dans un environnement où la jeunesse est de plus en plus en proie au manque de compétence pratique, 
-                nous offrons la possibilité d'être des porteurs de solutions et acteurs du développement de leur pays. 
+                Dans un environnement où la jeunesse est de plus en plus en proie au manque de compétence pratique,
+                nous offrons la possibilité d'être des porteurs de solutions et acteurs du développement de leur pays.
                 Notre objectif est de promouvoir l'import substitution et le transfert de technologie.
               </p>
               <div className="space-y-4">
@@ -172,7 +173,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <h4 className="text-xl font-bold text-gray-900 mb-3">Excellence</h4>
                 <p className="text-gray-600">
-                  Nous offrons des formations de qualité avec des formateurs qualifiés 
+                  Nous offrons des formations de qualité avec des formateurs qualifiés
                   et des équipements modernes pour garantir l'acquisition de compétences.
                 </p>
               </div>
@@ -182,7 +183,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <h4 className="text-xl font-bold text-gray-900 mb-3">Communauté</h4>
                 <p className="text-gray-600">
-                  Nous ciblons les étudiants, élèves, entreprises, startups et particuliers 
+                  Nous ciblons les étudiants, élèves, entreprises, startups et particuliers
                   pour créer une communauté d'apprentissage technique et pratique.
                 </p>
               </div>
@@ -192,7 +193,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <h4 className="text-xl font-bold text-gray-900 mb-3">Innovation</h4>
                 <p className="text-gray-600">
-                  Nous portons des projets innovateurs dans le développement durable 
+                  Nous portons des projets innovateurs dans le développement durable
                   et intégrons les dernières technologies industrielles.
                 </p>
               </div>
@@ -307,7 +308,7 @@ const HomePage: React.FC = () => {
               <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative group">
                   <img
-                    src={product.image}
+                    src={fixImageUrl(product.image)}
                     alt={product.name}
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
