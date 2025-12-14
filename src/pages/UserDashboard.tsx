@@ -12,6 +12,7 @@ import UserCourseViewer from "../components/UserCourseViewer";
 import { useAuth } from "../contexts/AuthContext";
 import { useCourses } from "../contexts/CoursesContext";
 import { apiService } from "../services/api";
+import { getMediaUrl } from "../utils/mediaUrl";
 
 const UserDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -237,7 +238,7 @@ const UserDashboard: React.FC = () => {
                         className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
                       >
                         <img
-                          src={course.image}
+                          src={getMediaUrl(course.image)}
                           alt={course.title}
                           className="w-12 h-12 object-cover rounded-lg"
                         />
@@ -282,7 +283,7 @@ const UserDashboard: React.FC = () => {
                             className="border border-gray-200 rounded-lg p-4"
                           >
                             <img
-                              src={course.image}
+                              src={getMediaUrl(course.image)}
                               alt={course.title}
                               className="w-full h-32 object-cover rounded-lg mb-4"
                             />

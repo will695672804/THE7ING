@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Users, BookOpen, ShoppingBag, Play, Award, MessageCircle } from 'lucide-react';
 import { useCourses } from '../contexts/CoursesContext';
 import { useProducts } from '../contexts/ProductsContext';
-import { fixImageUrl } from '../services/api';
+import { getMediaUrl } from '../utils/mediaUrl';
 
 const HomePage: React.FC = () => {
   const { courses } = useCourses();
@@ -242,7 +242,7 @@ const HomePage: React.FC = () => {
               <div key={course.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative">
                   <img
-                    src={course.image}
+                    src={getMediaUrl(course.image)}
                     alt={course.title}
                     className="w-full h-48 object-cover"
                   />
@@ -308,7 +308,7 @@ const HomePage: React.FC = () => {
               <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative group">
                   <img
-                    src={fixImageUrl(product.image)}
+                    src={getMediaUrl(product.image)}
                     alt={product.name}
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                   />

@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, ShoppingCart, Heart, Share2, Truck, Shield, RotateCcw } from 'lucide-react';
 import { useProducts } from '../contexts/ProductsContext';
 import { useCart } from '../contexts/CartContext';
-import { fixImageUrl } from '../services/api';
+import { getMediaUrl } from '../utils/mediaUrl';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -83,7 +83,7 @@ const ProductDetailPage: React.FC = () => {
           <div className="space-y-4">
             <div className="aspect-square bg-white rounded-xl overflow-hidden shadow-lg">
               <img
-                src={fixImageUrl(product.image)}
+                src={getMediaUrl(product.image)}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -106,8 +106,8 @@ const ProductDetailPage: React.FC = () => {
                     <Star
                       key={i}
                       className={`h-5 w-5 ${i < Math.floor(product.rating)
-                          ? 'text-yellow-400 fill-current'
-                          : 'text-gray-300'
+                        ? 'text-yellow-400 fill-current'
+                        : 'text-gray-300'
                         }`}
                     />
                   ))}
@@ -208,8 +208,8 @@ const ProductDetailPage: React.FC = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`px-6 py-4 font-medium text-sm border-b-2 ${activeTab === tab.id
-                      ? 'border-green-500 text-green-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                 >
                   {tab.label}
@@ -281,7 +281,7 @@ const ProductDetailPage: React.FC = () => {
                   className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
                 >
                   <img
-                    src={fixImageUrl(relatedProduct.image)}
+                    src={getMediaUrl(relatedProduct.image)}
                     alt={relatedProduct.name}
                     className="w-full h-48 object-cover"
                   />

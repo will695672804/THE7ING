@@ -2,6 +2,7 @@ import { BookOpen, Clock, Filter, Search, Star, Users } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCourses } from "../contexts/CoursesContext";
+import { getMediaUrl } from "../utils/mediaUrl";
 
 const CoursesPage: React.FC = () => {
   const { courses } = useCourses();
@@ -113,7 +114,7 @@ const CoursesPage: React.FC = () => {
             >
               <div className="relative">
                 <img
-                  src={course.image}
+                  src={getMediaUrl(course.image)}
                   alt={course.title}
                   className="w-full h-48 object-cover"
                 />

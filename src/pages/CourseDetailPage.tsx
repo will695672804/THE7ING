@@ -12,6 +12,7 @@ import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useCart } from "../contexts/CartContext";
 import { useCourses } from "../contexts/CoursesContext";
+import { getMediaUrl } from "../utils/mediaUrl";
 
 const CourseDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -112,7 +113,7 @@ const CourseDetailPage: React.FC = () => {
               <div className="bg-white rounded-xl p-6 shadow-lg">
                 <div className="relative mb-6">
                   <img
-                    src={course.image}
+                    src={getMediaUrl(course.image)}
                     alt={course.title}
                     className="w-full h-48 object-cover rounded-lg"
                   />
@@ -179,11 +180,10 @@ const CourseDetailPage: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === tab.id
+                    className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
                         ? "border-blue-500 text-blue-600"
                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                    }`}
+                      }`}
                   >
                     {tab.label}
                   </button>
@@ -328,7 +328,7 @@ const CourseDetailPage: React.FC = () => {
                     >
                       <div className="flex space-x-3">
                         <img
-                          src={similarCourse.image}
+                          src={getMediaUrl(similarCourse.image)}
                           alt={similarCourse.title}
                           className="w-16 h-16 object-cover rounded-lg"
                         />

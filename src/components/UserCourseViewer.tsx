@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Play, CheckCircle, Clock, BookOpen } from 'lucide-react';
 import { Course } from '../contexts/CoursesContext';
 import { useCourses } from '../contexts/CoursesContext';
+import { getMediaUrl } from '../utils/mediaUrl';
 
 interface UserCourseViewerProps {
   course: Course;
@@ -64,7 +65,7 @@ const UserCourseViewer: React.FC<UserCourseViewerProps> = ({ course, onBack }) =
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-start space-x-4">
           <img
-            src={course.image}
+            src={getMediaUrl(course.image)}
             alt={course.title}
             className="w-20 h-20 object-cover rounded-lg"
           />
@@ -91,7 +92,7 @@ const UserCourseViewer: React.FC<UserCourseViewerProps> = ({ course, onBack }) =
                   key={currentLesson.id}
                   className="w-full h-full"
                   controls
-                  poster={course.image}
+                  poster={getMediaUrl(course.image)}
                 >
                   <source src={currentLesson.videoUrl} type="video/mp4" />
                   Votre navigateur ne supporte pas la lecture vidéo.
@@ -106,7 +107,7 @@ const UserCourseViewer: React.FC<UserCourseViewerProps> = ({ course, onBack }) =
                 </div>
               )}
             </div>
-            
+
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -161,11 +162,10 @@ const UserCourseViewer: React.FC<UserCourseViewerProps> = ({ course, onBack }) =
                 <button
                   key={lesson.id}
                   onClick={() => setCurrentLessonIndex(index)}
-                  className={`w-full text-left p-3 rounded-lg transition-colors ${
-                    index === currentLessonIndex
+                  className={`w-full text-left p-3 rounded-lg transition-colors ${index === currentLessonIndex
                       ? 'bg-blue-50 border border-blue-200'
                       : 'hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center space-x-3">
                     <div className="flex-shrink-0">
@@ -180,9 +180,8 @@ const UserCourseViewer: React.FC<UserCourseViewerProps> = ({ course, onBack }) =
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className={`font-medium text-sm ${
-                        index === currentLessonIndex ? 'text-blue-900' : 'text-gray-900'
-                      }`}>
+                      <h4 className={`font-medium text-sm ${index === currentLessonIndex ? 'text-blue-900' : 'text-gray-900'
+                        }`}>
                         {lesson.title}
                       </h4>
                       <p className="text-xs text-gray-500">{lesson.duration}</p>

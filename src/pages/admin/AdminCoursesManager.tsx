@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Search, Filter, Upload } from 'lucide-react';
 import { useCourses, Course } from '../../contexts/CoursesContext';
+import { getMediaUrl } from '../../utils/mediaUrl';
 
 const AdminCoursesManager: React.FC = () => {
   const { courses, addCourse, updateCourse, deleteCourse } = useCourses();
@@ -90,7 +91,7 @@ const AdminCoursesManager: React.FC = () => {
                     <div className="flex items-center space-x-4">
                       {course.image && (
                         <video
-                          src={course.image}
+                          src={getMediaUrl(course.image)}
                           className="w-12 h-12 object-cover rounded-lg"
                         />
                       )}
