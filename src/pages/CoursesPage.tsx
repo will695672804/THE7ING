@@ -2,21 +2,22 @@ import { BookOpen, Clock, Filter, Search, Star, Users } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCourses } from "../contexts/CoursesContext";
+import { formatDuration, getLevelLabel } from "../types/courses";
 import { getMediaUrl } from "../utils/mediaUrl";
 
 const CoursesPage: React.FC = () => {
-  const { courses } = useCourses();
+  const { courses, loading } = useCourses();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
 
-  const categories = [...new Set(courses.map((course) => course.category))];
-  const levels = [...new Set(courses.map((course) => course.level))];
+  const categories = [...new Set(courses.map((course) => course.category).filter(Boolean))];
+  const levels = ['beginner', 'intermediate', 'advanced'];
 
   const filteredCourses = courses.filter((course) => {
     const matchesSearch =
-      course.title.toLowerCase().startsWith(searchTerm.toLowerCase()) ||
-      course.description.toLowerCase().startsWith(searchTerm.toLowerCase());
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       !selectedCategory || course.category === selectedCategory;
     const matchesLevel = !selectedLevel || course.level === selectedLevel;
@@ -41,7 +42,7 @@ const CoursesPage: React.FC = () => {
               Nos Pôles de Formation
             </h1>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Développez vos compétences avec nos pôles spécialisés en sciences de l'ingénieur.
+              Développez vos compétences avec nos formations professionnelles conçues par des experts.
             </p>
           </div>
         </div>
@@ -84,7 +85,7 @@ const CoursesPage: React.FC = () => {
               <option value="">Tous les niveaux</option>
               {levels.map((level) => (
                 <option key={level} value={level}>
-                  {level}
+                  {getLevelLabel(level as any)}
                 </option>
               ))}
             </select>
@@ -105,75 +106,115 @@ const CoursesPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Loading */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Chargement des formations...</p>
+          </div>
+        )}
+
         {/* Courses Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredCourses.map((course) => (
-            <div
-              key={course.id}
-              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-            >
-              <div className="relative">
-                <img
-                  src={getMediaUrl(course.image)}
-                  alt={course.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute top-4 right-4 bg-white bg-opacity-90 px-3 py-1 rounded-full text-sm font-medium">
-                  {course.level}
-                </div>
-                <div className="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm">
-                  {course.category}
-                </div>
-              </div>
-
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-                  {course.title}
-                </h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                  {course.description}
-                </p>
-
-                <div className="flex items-center text-sm text-gray-500 mb-4">
-                  <span>Par {course.instructor}</span>
-                </div>
-
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="text-sm font-medium ml-1">
-                        {course.rating}
-                      </span>
+        {!loading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredCourses.map((course) => (
+              <div
+                key={course.id}
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow group"
+              >
+                <div className="relative">
+                  <img
+                    src={getMediaUrl(course.thumbnail)}
+                    alt={course.title}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-4 right-4 bg-white bg-opacity-90 px-3 py-1 rounded-full text-sm font-medium">
+                    {getLevelLabel(course.level)}
+                  </div>
+                  <div className="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm">
+                    {course.category}
+                  </div>
+                  {course.discountPrice && (
+                    <div className="absolute top-4 left-4 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                      PROMO
                     </div>
-                    <div className="flex items-center text-gray-500">
-                      <Users className="h-4 w-4 mr-1" />
-                      <span className="text-sm">{course.studentsCount}</span>
-                    </div>
-                    <div className="flex items-center text-gray-500">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span className="text-sm">{course.duration}</span>
+                  )}
+                </div>
+
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+                    {course.title}
+                  </h3>
+                  {course.subtitle && (
+                    <p className="text-gray-500 text-sm mb-2 line-clamp-1">
+                      {course.subtitle}
+                    </p>
+                  )}
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {course.description}
+                  </p>
+
+                  <div className="flex items-center text-sm text-gray-500 mb-4">
+                    <span>Par {typeof course.instructor === 'string' ? course.instructor : course.instructor.name}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center">
+                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                        <span className="text-sm font-medium ml-1">
+                          {course.averageRating.toFixed(1)}
+                        </span>
+                        <span className="text-xs text-gray-500 ml-1">
+                          ({course.totalReviews})
+                        </span>
+                      </div>
+                      <div className="flex items-center text-gray-500">
+                        <Users className="h-4 w-4 mr-1" />
+                        <span className="text-sm">{course.totalStudents}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-blue-600">
-                    {course.price}€
-                  </span>
-                  <Link
-                    to={`/course/${course.id}`}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Voir le cours
-                  </Link>
+                  <div className="flex items-center text-sm text-gray-500 mb-4">
+                    <Clock className="h-4 w-4 mr-1" />
+                    <span>{formatDuration(course.totalDuration)}</span>
+                    <span className="mx-2">•</span>
+                    <BookOpen className="h-4 w-4 mr-1" />
+                    <span>{course.totalLectures} leçons</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-baseline space-x-2">
+                      {course.discountPrice ? (
+                        <>
+                          <span className="text-2xl font-bold text-blue-600">
+                            {course.discountPrice}€
+                          </span>
+                          <span className="text-lg text-gray-400 line-through">
+                            {course.price}€
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-2xl font-bold text-blue-600">
+                          {course.price}€
+                        </span>
+                      )}
+                    </div>
+                    <Link
+                      to={`/course/${course.id}`}
+                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Voir le cours
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
-        {filteredCourses.length === 0 && (
+        {!loading && filteredCourses.length === 0 && (
           <div className="text-center py-12">
             <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-gray-900 mb-2">

@@ -32,8 +32,20 @@ const UserDashboard: React.FC = () => {
 
   const enrolledCourses = courses.filter((course) => course.isEnrolled);
   const completedCourses = enrolledCourses.filter(
-    (course) => course.progress === 100
+    (course) => (course.progress?.progressPercentage ?? 0) === 100
   );
+
+  // Helper to get instructor name
+  const getInstructorName = (instructor: any): string => {
+    if (typeof instructor === 'string') return instructor;
+    return instructor?.name ?? '';
+  };
+
+  // Helper to get progress percentage
+  const getProgress = (course: any): number => {
+    if (typeof course.progress === 'number') return course.progress;
+    return course.progress?.progressPercentage ?? 0;
+  };
 
   const tabs = [
     { id: "overview", label: "Vue d'ensemble", icon: User },
@@ -238,7 +250,7 @@ const UserDashboard: React.FC = () => {
                         className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
                       >
                         <img
-                          src={getMediaUrl(course.image)}
+                          src={getMediaUrl(course.thumbnail)}
                           alt={course.title}
                           className="w-12 h-12 object-cover rounded-lg"
                         />
@@ -247,13 +259,13 @@ const UserDashboard: React.FC = () => {
                             {course.title}
                           </h3>
                           <p className="text-sm text-gray-500">
-                            Progression: {course.progress || 0}%
+                            Progression: {getProgress(course)}%
                           </p>
                         </div>
                         <div className="w-24 bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-blue-600 h-2 rounded-full"
-                            style={{ width: `${course.progress || 0}%` }}
+                            style={{ width: `${getProgress(course)}%` }}
                           ></div>
                         </div>
                       </div>
@@ -283,7 +295,7 @@ const UserDashboard: React.FC = () => {
                             className="border border-gray-200 rounded-lg p-4"
                           >
                             <img
-                              src={getMediaUrl(course.image)}
+                              src={getMediaUrl(course.thumbnail)}
                               alt={course.title}
                               className="w-full h-32 object-cover rounded-lg mb-4"
                             />
@@ -291,20 +303,20 @@ const UserDashboard: React.FC = () => {
                               {course.title}
                             </h3>
                             <p className="text-sm text-gray-600 mb-4">
-                              {course.instructor}
+                              {getInstructorName(course.instructor)}
                             </p>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-sm text-gray-500">
                                 Progression
                               </span>
                               <span className="text-sm font-medium">
-                                {course.progress || 0}%
+                                {getProgress(course)}%
                               </span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
                               <div
                                 className="bg-blue-600 h-2 rounded-full"
-                                style={{ width: `${course.progress || 0}%` }}
+                                style={{ width: `${getProgress(course)}%` }}
                               ></div>
                             </div>
                             <button

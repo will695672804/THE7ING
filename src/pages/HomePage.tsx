@@ -238,49 +238,52 @@ const HomePage: React.FC = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredCourses.map(course => (
-              <div key={course.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="relative">
-                  <img
-                    src={getMediaUrl(course.image)}
-                    alt={course.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute top-4 right-4 bg-white bg-opacity-90 px-2 py-1 rounded-lg text-sm font-medium">
-                    {course.level}
-                  </div>
-                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all flex items-center justify-center">
-                    <div className="opacity-0 hover:opacity-100 transition-opacity">
-                      <Play className="h-12 w-12 text-white" />
+            {featuredCourses.map(course => {
+              const instructorName = typeof course.instructor === 'string' ? course.instructor : course.instructor?.name || '';
+              return (
+                <div key={course.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                  <div className="relative">
+                    <img
+                      src={getMediaUrl(course.thumbnail)}
+                      alt={course.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="absolute top-4 right-4 bg-white bg-opacity-90 px-2 py-1 rounded-lg text-sm font-medium">
+                      {course.level === 'beginner' ? 'Débutant' : course.level === 'intermediate' ? 'Intermédiaire' : 'Avancé'}
                     </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{course.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-500">Par {course.instructor}</span>
-                    <span className="text-sm text-gray-500">{course.duration}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-medium ml-1">{course.rating}</span>
+                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all flex items-center justify-center">
+                      <div className="opacity-0 hover:opacity-100 transition-opacity">
+                        <Play className="h-12 w-12 text-white" />
                       </div>
-                      <span className="text-sm text-gray-500">({course.studentsCount})</span>
                     </div>
-                    <span className="text-xl font-bold text-blue-600">{course.price}€</span>
                   </div>
-                  <Link
-                    to={`/course/${course.id}`}
-                    className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center block"
-                  >
-                    Voir le cours
-                  </Link>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{course.title}</h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm text-gray-500">Par {instructorName}</span>
+                      <span className="text-sm text-gray-500">{course.totalLectures} leçons</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex items-center">
+                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                          <span className="text-sm font-medium ml-1">{course.averageRating?.toFixed(1) || '0.0'}</span>
+                        </div>
+                        <span className="text-sm text-gray-500">({course.totalStudents || 0})</span>
+                      </div>
+                      <span className="text-xl font-bold text-blue-600">{course.price}€</span>
+                    </div>
+                    <Link
+                      to={`/course/${course.id}`}
+                      className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center block"
+                    >
+                      Voir le cours
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="text-center mt-12">
             <Link

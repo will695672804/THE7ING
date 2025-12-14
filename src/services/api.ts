@@ -95,28 +95,16 @@ class ApiService {
 
   // ============== COURSES ENDPOINTS ==============
 
-  async getCourses(params?: any) {
-    const queryString = params ? '?' + new URLSearchParams(params).toString() : '';
-    return this.request<{ courses: any[] }>(`/courses${queryString}`);
+  async getCourses(params?: { category?: string; level?: string; search?: string }) {
+    const queryString = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : '';
+    return this.request<{ courses: any[]; pagination?: any }>(`/courses${queryString}`);
   }
 
   async getCourse(id: string) {
     return this.request<{ course: any }>(`/courses/${id}`);
   }
 
-  async enrollInCourse(courseId: string) {
-    return this.request(`/courses/${courseId}/enroll`, {
-      method: 'POST',
-    });
-  }
-
-  async completeLesson(courseId: string, lessonId: string) {
-    return this.request(`/courses/${courseId}/lessons/${lessonId}/complete`, {
-      method: 'POST',
-    });
-  }
-
-  async addCourse(courseData: FormData) {
+  async createCourse(courseData: FormData) {
     return this.request('/courses', {
       method: 'POST',
       body: courseData,
@@ -133,6 +121,225 @@ class ApiService {
   async deleteCourse(id: string) {
     return this.request(`/courses/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  // ============== SECTIONS ENDPOINTS ==============
+
+  async createSection(courseId: string, data: { title: string; description?: string; orderIndex?: number }) {
+    return this.request(`/courses/${courseId}/sections`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateSection(sectionId: string, data: { title?: string; description?: string; orderIndex?: number }) {
+    return this.request(`/courses/sections/${sectionId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteSection(sectionId: string) {
+    return this.request(`/courses/sections/${sectionId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async reorderSections(courseId: string, sectionIds: string[]) {
+    return this.request(`/courses/${courseId}/sections/reorder`, {
+      method: 'PUT',
+      body: JSON.stringify({ section_ids: sectionIds }),
+    });
+  }
+
+  // ============== LECTURES (VIDEOS) ENDPOINTS ==============
+
+  async createLecture(sectionId: string, lectureData: FormData) {
+    return this.request(`/courses/sections/${sectionId}/lectures`, {
+      method: 'POST',
+      body: lectureData,
+    });
+  }
+
+  async updateLecture(lectureId: string, lectureData: FormData) {
+    return this.request(`/courses/lectures/${lectureId}`, {
+      method: 'PUT',
+      body: lectureData,
+    });
+  }
+
+  async deleteLecture(lectureId: string) {
+    return this.request(`/courses/lectures/${lectureId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async addLectureResource(lectureId: string, resourceData: FormData) {
+    return this.request(`/courses/lectures/${lectureId}/resources`, {
+      method: 'POST',
+      body: resourceData,
+    });
+  }
+
+  async deleteLectureResource(resourceId: string) {
+    return this.request(`/courses/lecture-resources/${resourceId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // ============== ENROLLMENT & PROGRESS ENDPOINTS ==============
+
+  async enrollInCourse(courseId: string) {
+    return this.request(`/courses/${courseId}/enroll`, {
+      method: 'POST',
+    });
+  }
+
+  async getCourseProgress(courseId: string) {
+    return this.request<{ enrollment: any; lectureProgresses: any[] }>(`/courses/${courseId}/progress`);
+  }
+
+  async getMyEnrolledCourses() {
+    return this.request<{ courses: any[] }>('/courses/my-courses');
+  }
+
+  async completeLecture(lectureId: string) {
+    return this.request(`/courses/lectures/${lectureId}/complete`, {
+      method: 'POST',
+    });
+  }
+
+  async saveLectureProgress(lectureId: string, data: { videoPosition: number; timeWatched?: number }) {
+    return this.request(`/courses/lectures/${lectureId}/save-progress`, {
+      method: 'POST',
+      body: JSON.stringify({
+        video_position: data.videoPosition,
+        time_watched: data.timeWatched || 0,
+      }),
+    });
+  }
+
+  async getCertificate(enrollmentId: string) {
+    return this.request<{ certificate: any }>(`/courses/enrollments/${enrollmentId}/certificate`);
+  }
+
+  // ============== NOTES ENDPOINTS ==============
+
+  async getCourseNotes(courseId: string) {
+    return this.request<{ notes: any[] }>(`/courses/${courseId}/notes`);
+  }
+
+  async createNote(lectureId: string, data: { content: string; timestamp: number }) {
+    return this.request(`/courses/lectures/${lectureId}/notes`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateNote(noteId: string, data: { content: string }) {
+    return this.request(`/courses/notes/${noteId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteNote(noteId: string) {
+    return this.request(`/courses/notes/${noteId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // ============== BOOKMARKS ENDPOINTS ==============
+
+  async getCourseBookmarks(courseId: string) {
+    return this.request<{ bookmarks: any[] }>(`/courses/${courseId}/bookmarks`);
+  }
+
+  async createBookmark(lectureId: string, data: { title?: string; timestamp: number }) {
+    return this.request(`/courses/lectures/${lectureId}/bookmarks`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteBookmark(bookmarkId: string) {
+    return this.request(`/courses/bookmarks/${bookmarkId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // ============== Q&A ENDPOINTS ==============
+
+  async getLectureQuestions(lectureId: string) {
+    return this.request<{ questions: any[] }>(`/courses/lectures/${lectureId}/questions`);
+  }
+
+  async getQuestion(questionId: string) {
+    return this.request<{ question: any }>(`/courses/questions/${questionId}`);
+  }
+
+  async createQuestion(lectureId: string, data: { title: string; content: string }) {
+    return this.request(`/courses/lectures/${lectureId}/questions`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async upvoteQuestion(questionId: string) {
+    return this.request(`/courses/questions/${questionId}/upvote`, {
+      method: 'POST',
+    });
+  }
+
+  async createAnswer(questionId: string, data: { content: string }) {
+    return this.request(`/courses/questions/${questionId}/answers`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async acceptAnswer(answerId: string) {
+    return this.request(`/courses/answers/${answerId}/accept`, {
+      method: 'POST',
+    });
+  }
+
+  async upvoteAnswer(answerId: string) {
+    return this.request(`/courses/answers/${answerId}/upvote`, {
+      method: 'POST',
+    });
+  }
+
+  // ============== REVIEWS ENDPOINTS ==============
+
+  async getCourseReviews(courseId: string) {
+    return this.request<{ reviews: any[]; averageRating: number; totalReviews: number }>(`/courses/${courseId}/reviews`);
+  }
+
+  async createReview(courseId: string, data: { rating: number; title?: string; comment: string }) {
+    return this.request(`/courses/${courseId}/reviews`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateReview(reviewId: string, data: { rating?: number; title?: string; comment?: string }) {
+    return this.request(`/courses/reviews/${reviewId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteReview(reviewId: string) {
+    return this.request(`/courses/reviews/${reviewId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async markReviewHelpful(reviewId: string) {
+    return this.request(`/courses/reviews/${reviewId}/helpful`, {
+      method: 'POST',
     });
   }
 
