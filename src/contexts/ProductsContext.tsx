@@ -104,7 +104,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addProduct = async (productData: FormData) => {
     try {
-      await apiService.createProduct(productData);
+      await apiService.addProduct(productData);
       await fetchProducts();
     } catch (error: any) {
       console.error('Error adding product:', error);
